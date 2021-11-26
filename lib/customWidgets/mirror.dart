@@ -66,7 +66,7 @@ class _MirrorState extends State<Mirror> {
   }
 
   void _createListViews(List content) {
-    this.customListView = MyScener(
+    this.customListView = ReflectedScreen(
       contentList: content,
     );
 

@@ -3,7 +3,6 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-int numItems = 10;
 var onSelectCard = ValueNotifier<int>(0);
 
 class CardData {
@@ -12,11 +11,6 @@ class CardData {
   final int idx;
   double alpha = 0;
   Widget contentItem;
-
-  Color get lightColor {
-    var val = HSVColor.fromColor(color);
-    return val.withSaturation(.5).withValue(.8).toColor();
-  }
 
   CardData(this.idx, contentList) {
     contentItem = contentList[idx];
@@ -27,17 +21,19 @@ class CardData {
   }
 }
 
-class MyScener extends StatefulWidget {
+class ReflectedScreen extends StatefulWidget {
   final List<Widget> contentList;
-  AnimationController controller;
-  MyScener({Key key, @required this.contentList, @required this.controller})
-      : super(key: key);
+  ReflectedScreen({
+    Key key,
+    @required this.contentList,
+  }) : super(key: key);
 
   @override
-  _MyScenerState createState() => _MyScenerState();
+  _ReflectedScreenState createState() => _ReflectedScreenState();
 }
 
-class _MyScenerState extends State<MyScener> with TickerProviderStateMixin {
+class _ReflectedScreenState extends State<ReflectedScreen>
+    with TickerProviderStateMixin {
   AnimationController _scaleController;
   List<CardData> cardData = [];
   double radio = 200.0;
@@ -51,7 +47,7 @@ class _MyScenerState extends State<MyScener> with TickerProviderStateMixin {
   void initState() {
     cardData = List.generate(widget.contentList.length,
         (index) => CardData(index, widget.contentList)).toList();
-    radioStep = (pi * 2) / numItems;
+    radioStep = (pi * 2) / widget.contentList.length;
     _scaleController =
         AnimationController(duration: Duration(milliseconds: 500), vsync: this);
     _scaleController.addListener(() => setState(() {}));
@@ -67,7 +63,7 @@ class _MyScenerState extends State<MyScener> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    //radio = MediaQuery.of(context).size.width / 3.0; // Radius
+    radio = MediaQuery.of(context).size.width / 5; // Radius
     var initAngleOffset = pi / 2 + (-_dragX * .006);
     initAngleOffset += selectedAngle;
 
@@ -76,8 +72,8 @@ class _MyScenerState extends State<MyScener> with TickerProviderStateMixin {
       var c = cardData[i];
       double ang = initAngleOffset + c.idx * radioStep;
       c.angle = ang + pi / 2;
-      c.x = cos(ang) * radio;
-      c.y = sin(ang) * -30; // Till of eclipse
+      c.x = cos(ang) * radio * 1.5; // Radius
+      c.y = sin(ang) * -40; // Till of eclipse
       c.z = sin(ang) * radio;
     }
 
@@ -88,21 +84,21 @@ class _MyScenerState extends State<MyScener> with TickerProviderStateMixin {
       var c = addCard(vo);
       var mt2 = Matrix4.identity();
       mt2.setEntry(3, 2, 0.001);
-      mt2.translate(vo.x, vo.y, -vo.z);
+      mt2.translate(vo.x, vo.y, -vo.z); // Position right/left/scale
       // mt2.rotateY(vo.angle + pi); //Card rotation
       c = Transform(
         alignment: Alignment.center,
-        origin: Offset(0.0, -100 + _scaleController.value * 900.0),
+        origin: Offset(0, -100 + _scaleController.value),
         transform: mt2,
         child: c,
       );
 
       // depth of field... doesnt work on web.
-      var blur = .4 + ((1 - vo.z / radio) / 2) * 2;
-      c = BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-        child: c,
-      );
+      // var blur = .4 + ((1 - vo.z / radio) / 2) * 2;
+      // c = BackdropFilter(
+      //  filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+      //   child: c,
+      //);
 
       return c;
     }).toList();
@@ -110,7 +106,6 @@ class _MyScenerState extends State<MyScener> with TickerProviderStateMixin {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onPanDown: (e) {
-        // isMousePressed = true;
         setState(() {});
         if (animateOnPen)
           _scaleController.animateTo(1,
@@ -128,67 +123,81 @@ class _MyScenerState extends State<MyScener> with TickerProviderStateMixin {
             curve: Curves.fastLinearToSlowEaseIn);
         setState(() {});
       },
-      child: Container(
+      child: Stack(
         alignment: Alignment.center,
-        child: Stack(
-          alignment: Alignment.center,
-          children: list,
-        ),
+        children: [
+          Positioned(
+            top: 200, //MediaQuery.of(context).size.height / 2.2,
+            child: Transform(
+              origin: Offset(0, 0),
+              transform: Matrix4.identity()
+                ..setEntry(3, 2, 0.001)
+                ..rotateX(3.2),
+              alignment: Alignment.bottomCenter,
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height / 3,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: list,
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            top: MediaQuery.of(context).size.height / 2,
+            child: Container(
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height / 2,
+              decoration: BoxDecoration(
+                border:
+                    Border(top: BorderSide(width: 0.6, color: Colors.white)),
+                color: Colors.white,
+                gradient: new LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color.fromRGBO(31, 42, 53, 0.2),
+                    Color.fromRGBO(31, 42, 53, 0.85),
+                    Color.fromRGBO(51, 62, 73, 1),
+                    Color.fromRGBO(51, 62, 73, 1),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            top: MediaQuery.of(context).size.height / 3.5,
+            child: Stack(
+              alignment: Alignment.center,
+              children: list,
+            ),
+          ),
+        ],
       ),
     );
   }
 
   Widget addCard(CardData vo) {
-    var alpha = ((1 - vo.z / radio) / 2) * .8;
     Widget c;
     c = Stack(children: [
       Positioned(
         child: Container(
-          margin: EdgeInsets.all(12),
+          // TODO: breite höhe berechnen/parametrisieren
           width: 350,
           height: 220,
           alignment: Alignment.center,
-          foregroundDecoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(1),
-            color: Colors.black.withOpacity(alpha),
-          ),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              stops: [0.5 - vo.x * 0.001, 0.5 - vo.x * 0.001],
-              colors: [
-                vo.lightColor,
-                vo.color,
-              ],
-            ),
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                  color: Colors.black.withOpacity(.2 + alpha * .2),
-                  spreadRadius: 1,
-                  blurRadius: 12,
-                  offset: Offset(0, 2))
-            ],
-          ),
-          child: Transform.scale(
-            scale: 1,
-            child: vo.contentItem,
-          ),
+          child: vo.contentItem,
         ),
       ),
+      // Spiegelung über Item
       Positioned(
         child: Opacity(
           opacity: 0.15,
           child: Container(
-            margin: EdgeInsets.all(12),
             width: 350,
             height: 220,
             alignment: Alignment.center,
-            foregroundDecoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              color: Colors.black.withOpacity(alpha),
-            ),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
@@ -197,50 +206,13 @@ class _MyScenerState extends State<MyScener> with TickerProviderStateMixin {
                 colors: [
                   Color.fromARGB(0, 0, 0, 0),
                   Color.fromARGB(85, 255, 255, 255),
-                  //vo.lightColor,
-                  //vo.color,
                 ],
               ),
-              borderRadius: BorderRadius.circular(4),
-              boxShadow: [
-                BoxShadow(
-                    color: Colors.black.withOpacity(.2 + alpha * .2),
-                    spreadRadius: 1,
-                    blurRadius: 12,
-                    offset: Offset(0, 2))
-              ],
             ),
-            child: Container(),
           ),
         ),
       ),
     ]);
-    return GestureDetector(
-      child: c,
-      onTap: () => onSelectCard.value = vo.idx,
-    );
-  }
-}
-
-class SceneCardSelector extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: Colors.black,
-      height: 80,
-      child: Row(
-        children: List.generate(
-            numItems,
-            (index) => Expanded(
-                  child: SizedBox(
-                    height: 80,
-                    child: OutlinedButton(
-                      child: Text(index.toString()),
-                      onPressed: () => onSelectCard.value = index,
-                    ),
-                  ),
-                )),
-      ),
-    );
+    return c;
   }
 }

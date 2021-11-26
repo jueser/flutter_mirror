@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:linked_scroll_controller/linked_scroll_controller.dart';
-import 'package:rpi_center/customWidgets/mirror.dart';
+import 'package:rpi_center/customWidgets/carusel.dart';
 import 'package:rpi_center/partials/clock_card.dart';
 import 'package:rpi_center/styles/box_decoration.dart';
 
@@ -81,14 +81,16 @@ class _MirrorEffectState extends State<MirrorEffect> {
             child: Container(
               height: _screenHeight,
               width: _screenWidth,
-              child: Mirror(
+              child: ReflectedScreen(
+                contentList: content,
+              ), /*Mirror(
                 depthOfMirror: 0.48,
                 screenHeight: _screenHeight,
                 screenWidth: _screenWidth,
                 boxWidth: boxWidth,
                 boxHeight: boxHeight,
                 item: content,
-              ),
+              ),*/
             ),
           ),
         ),
