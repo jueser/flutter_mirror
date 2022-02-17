@@ -132,7 +132,7 @@ class _ReflectedScreenState extends State<ReflectedScreen>
               origin: Offset(0, 0),
               transform: Matrix4.identity()
                 ..setEntry(3, 2, 0.001)
-                ..rotateX(3.2),
+                ..rotateX(3.15),
               alignment: Alignment.bottomCenter,
               child: SizedBox(
                 width: MediaQuery.of(context).size.width,

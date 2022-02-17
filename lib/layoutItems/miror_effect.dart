@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:linked_scroll_controller/linked_scroll_controller.dart';
 import 'package:rpi_center/customWidgets/carusel.dart';
 import 'package:rpi_center/partials/clock_card.dart';
-import 'package:rpi_center/styles/box_decoration.dart';
 
 class MirrorEffect extends StatefulWidget {
   const MirrorEffect({Key key}) : super(key: key);
@@ -34,33 +33,12 @@ class _MirrorEffectState extends State<MirrorEffect> {
     var _screenWidth = MediaQuery.of(context).size.width;
 
     List<Widget> content = [
-      SizedBox(width: 450, height: 320, child: ClockCard()),
-      SizedBox(width: 450, height: 320, child: ClockCard()),
-      SizedBox(width: 450, height: 320, child: ClockCard()),
-      SizedBox(width: 450, height: 320, child: ClockCard()),
-      SizedBox(width: 450, height: 320, child: ClockCard()),
-      SizedBox(
-        width: 450,
-        height: 220,
-        child: Container(
-          decoration: borderedCardStyle,
-          child: Row(
-            children: [
-              Flexible(
-                flex: 1,
-                child: SizedBox(
-                  height: double.infinity,
-                  child: Text('Hallo'),
-                ),
-              ),
-              Flexible(
-                flex: 1,
-                child: Text('test'),
-              ),
-            ],
-          ),
-        ),
-      ),
+      ClockCard(),
+      ClockCard(),
+      ClockCard(),
+      ClockCard(),
+      ClockCard(),
+      ClockCard(),
     ];
 
     return Scaffold(
@@ -83,14 +61,7 @@ class _MirrorEffectState extends State<MirrorEffect> {
               width: _screenWidth,
               child: ReflectedScreen(
                 contentList: content,
-              ), /*Mirror(
-                depthOfMirror: 0.48,
-                screenHeight: _screenHeight,
-                screenWidth: _screenWidth,
-                boxWidth: boxWidth,
-                boxHeight: boxHeight,
-                item: content,
-              ),*/
+              ),
             ),
           ),
         ),
